@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Bootstrap CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #6e8efb, #a777e3);
+      font-family: 'Segoe UI', sans-serif;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      max-width: 500px;
+    }
+    .card {
+      border-radius: 20px;
+      padding: 30px;
+      background-color: #fff;
+      color: #333;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+    .btn-custom {
+      background-color: #6e8efb;
+      color: #fff;
+    }
+    .btn-custom:hover {
+      background-color: #4b6cb7;
+    }
+    .timer {
+      font-weight: bold;
+      color: #dc3545;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div id="loginPage" class="card">
+    <h3 class="text-center mb-4">Login</h3>
+    <input type="text" id="username" class="form-control mb-3" placeholder="Enter Username">
+    <input type="password" id="password" class="form-control mb-3" placeholder="Enter Password">
+    <button onclick="login()" class="btn btn-custom w-100">Login</button>
+  </div>
+
+  <div id="quizPage" class="card d-none">
+    <div id="quizContent">
+      <h4 id="question"></h4>
+      <div id="options" class="my-3"></div>
+      <p class="timer">Time left: <span id="timeLeft">10</span>s</p>
+      <p id="feedback" class="fw-bold"></p>
+      <button onclick="nextQuestion()" class="btn btn-custom w-100 mt-3">Next</button>
+    </div>
+    <div id="result" class="d-none text-center">
+      <h3 class="text-success">Quiz Completed!</h3>
+      <h4>Your Score: <span id="finalScore"></span></h4>
+    </div>
+  </div>
+</div>
+
+<script>
+  const questions = [
+    {
+      question: "What is the capital of France?",
+      options: ["Paris", "London", "Berlin", "Rome"],
+      answer: "Paris"
+    },
+    {
+      question: "2 + 2 = ?",
+      options: ["3", "4", "5", "6"],
+      answer: "4"
+    },
+    {
+      question: "Which language runs in a web browser?",
+      options: ["Java", "C", "Python", "JavaScript"],
+      answer: "JavaScript"
+    }
+  ];
+
+  let currentQuestion = 0;
+  let score = 0;
+  let time = 10;
+  let timer;
+
+  function login() {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+    if (username && password) {
+      localStorage.setItem("username", username);
+      localStorage.setItem("password", password);
+      document.getElementById("loginPage").classList.add("d-none");
+      document.getElementById("quizPage").classList.remove("d-none");
+      showQuestion();
+    } else {
+      alert("Please enter both username and password.");
+    }
+  }
+
+  function showQuestion() {
+    clearInterval(timer);
+    time = 10;
+    document.getElementById("timeLeft").textContent = time;
+    timer = setInterval(countdown, 1000);
+
+    const q = questions[currentQuestion];
+    document.getElementById("question").textContent = q.question;
+
+    const optionsDiv = document.getElementById("options");
+    optionsDiv.innerHTML = "";
+    q.options.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.className = "btn btn-outline-primary w-100 mb-2";
+      btn.textContent = opt;
+      btn.onclick = () => checkAnswer(opt);
+      optionsDiv.appendChild(btn);
+    });
+  }
+
+ 
+  function countdown() {
+    time--;
+    document.getElementById("timeLeft").textContent = time;
+    if (time === 0) {
+      clearInterval(timer);
+      score--;
+      document.getElementById("feedback").textContent = "Time's up!";
+    }
+  }
+
+  function checkAnswer(selected) {
+    clearInterval(timer);
+    const correct = questions[currentQuestion].answer;
+    if (selected === correct) {
+      score++;
+      document.getElementById("feedback").textContent = "✅ Correct!";
+    } else {
+      score--;
+      document.getElementById("feedback").textContent = `❌ Wrong! Correct answer: ${correct}`;
+    }
+  }
+
+  function nextQuestion() {
+    document.getElementById("feedback").textContent = "";
+    currentQuestion++;
+    if (currentQuestion < questions.length) {
+      showQuestion();
+    } else {
+      showResult();
+    }
+  }
+
+  function showResult() {
+    document.getElementById("quizContent").classList.add("d-none");
+    document.getElementById("result").classList.remove("d-none");
+    document.getElementById("finalScore").textContent = score;
+    localStorage.setItem("quizScore", score);
+  }
+</script>
+
+</body>
+</html>
